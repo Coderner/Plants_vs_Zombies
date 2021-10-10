@@ -175,13 +175,15 @@ function handleDefenders() {
   for (let i = 0; i < defenders.length; i++) {
     defenders[i].draw();
     defenders[i].update_beam();
-    if(enemyPosition.indexOf(defenders[i].y !== -1))
+
+    if(enemyPosition.indexOf(defenders[i].y) !== -1)
         {
           defenders[i].shooting = true;
         }    
     else{
           defenders[i].shooting = false;
     }
+
     for (let j = 0; j < enemies.length; j++) {
       if (ifcollide(defenders[i] && defenders[i], enemies[j])) {
         enemies[i].movement = 0;
