@@ -10,12 +10,14 @@ const Grid = [];
 
 const defenders = [];
 const enemies = [];
+const resources = [];
 
 let enemyPosition = [];
 let enemy__interval = 400;
 gameOver = false;
 const beams = []; //to hold all the projectile beams for all defender objects
 let score = 0;
+let win_score = 10;
 
 const mouse = {
   x: 10,
@@ -129,8 +131,8 @@ class defender {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.width = cellSize;
-    this.height = cellSize;
+    this.width = cellSize - cellGapping * 2; //to prevent collision of defenders and enemies from adjacent rows
+    this.height = cellSize - cellGapping * 2;
     this.shooting = false;
     this.health = 100;
     this.timer = 0;
@@ -156,9 +158,10 @@ class defender {
 }
 
 
+
 gameboard.addEventListener("click", function () {
-  const gridPositionX = mouse.x - (mouse.x % cellSize);
-  const gridPositionY = mouse.y - (mouse.y % cellSize);
+  const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
+  const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
   if (gridPositionY < cellSize) return;
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
@@ -176,7 +179,7 @@ function handleDefenders() {
     defenders[i].draw();
     defenders[i].update_beam();
 
-    if(enemyPosition.indexOf(defenders[i].y) !== -1)
+    if(enemyPosition.indexOf(defenders[i].y) !== -1) // beam wont be fired untill enemy occurs
         {
           defenders[i].shooting = true;
         }    
@@ -204,8 +207,8 @@ class Enemy {
   constructor(verticalPosition) {
     this.x = gameboard.width;
     this.y = verticalPosition;
-    this.width = cellSize;
-    this.height = cellSize;
+    this.width = cellSize - cellGapping * 2;
+    this.height = cellSize - cellGapping * 2;
     this.speed = Math.random() * 0.4 + 0.3;
     this.movement = this.speed;
     this.health = 100;
@@ -242,13 +245,48 @@ function enemy() {
   }
  }
   
- if (gridcount % enemy__interval === 0) {
-    let verticalPosition = Math.floor(Math.random() * 6 + 1) * cellSize;
+ if (gridcount % enemy__interval === 0 && score < win_score) {
+    let verticalPosition = Math.floor(Math.random() * 6 + 1) * cellSize + cellGapping;
     enemies.push(new Enemy(verticalPosition));
     enemyPosition.push(verticalPosition);
     if (enemy__interval > 180) enemy__interval -= 100;
   }
 }
+
+//additional resources
+const value = [20, 30, 40];
+class Resource {
+  constructor(){
+    this.x = Math.random() * (gameboard.width - cellSize);
+    this.y = (Math.floor (Math.random() * 5) + 1) * cellSize + 25;
+    this.width = cellSize * 0.6;
+    this.height = cellSize * 0.6;
+    this.value = value[Math.floor(Math.random() * value.length)]
+  }
+  draw(){
+    cntx.fillStyle = "yellow";
+    cntx.fillRect(this.x, this.y, this.width, this.height);
+    cntx.fillStyle = "black";
+    cntx.font = "20px Orbiton";
+    cntx.fillText(this.value, this.x + 15, this.y + 25);
+  }
+}
+function handleResources(){
+  if(gridcount % 500 === 0 && score < win_score)
+  {
+    resources.push(new Resource());
+  }
+  for( let i = 0; i < resources.length; i++){
+    resources[i].draw();
+    if (resources[i] && mouse.x && mouse.y && ifcollide(resources[i],mouse))
+    {
+      numberOfResources += resources[i].amount;
+      resources.splice(i,1);
+      i--;
+    }
+  }
+}
+
 
 function gameStatus() {
   cntx.fillStyle = "black";
@@ -260,6 +298,13 @@ function gameStatus() {
     cntx.font = "90 px Poppins";
     cntx.fillText("Game Over", 150, 330);
   }
+  if (score > win_score && enemies.length === 0){
+    cntx.fillStyle = "black";
+    cntx.font = "60px Orbitron";
+    cntx.fillText("LEVEL COMPLETE", 130, 300);
+    cntx.font = "30px Orbitron";
+    cntx.fillText("You win with " + score + " points", 134, 340);
+  }
 }
 
 function update() {
@@ -269,6 +314,7 @@ function update() {
   cntx.fillRect(0, 0, displayBar.width, displayBar.height);
   create();
   handleDefenders();
+  handleResources();
   handleBeams();
   enemy();
   gameStatus();
