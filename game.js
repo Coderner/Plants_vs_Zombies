@@ -19,12 +19,12 @@ const beams = []; //to hold all the projectile beams for all defender objects
 let score = 0;
 const win_score = 10;
 
-// const mouse = {
-//   x: 10,
-//   y: 10,
-//   width: 0.1,
-//   height: 0.1,
-// };
+const mouse = {
+  x: 10,
+  y: 10,
+  width: 0.1,
+  height: 0.1,
+};
 
 let gameboardposition = gameboard.getBoundingClientRect();
 gameboard.addEventListener("mousemove", function (e) {
