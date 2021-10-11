@@ -102,9 +102,9 @@ function test__collison(first, second) {
 
 //beams
 const beam1 = new Image();
-beam1.src = "beam1.png";
+beam1.src = "/assets/beam1.png";
 const beam2 = new Image();
-beam2.src = "beam2.png";
+beam2.src = "/assets/beam2.png";
 class Beams {
   constructor(x, y) {
     this.x = x;
@@ -179,9 +179,9 @@ function handleBeams() {
 //defenders
 let numberOfResources = 300;
 const defender1 = new Image();
-defender1.src = "attack1.png";
+defender1.src = "/assets/attack1.png";
 const defender2 = new Image();
-defender2.src = "attack2.png";
+defender2.src = "/assets/attack2.png";
 
 class defender {
   constructor(x, y) {
@@ -359,13 +359,13 @@ function handlemessages() {
 
 const EnemyTypes = [];
 const enemy1 = new Image();
-enemy1.src = "incoming1.png";
+enemy1.src = "/assets/incoming1.png";
 EnemyTypes.push(enemy1);
 const enemy2 = new Image();
-enemy2.src = "incoming2.png";
+enemy2.src = "/assets/incoming2.png";
 EnemyTypes.push(enemy2);
 const enemy3 = new Image();
-enemy3.src = "incoming3.png";
+enemy3.src = "/assets/incoming3.png";
 EnemyTypes.push(enemy3);
 
 class Enemy {
