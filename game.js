@@ -21,8 +21,8 @@ const win_score = 10;
 let chosenDefender = 1;
 
 const mouse = {
-  x: 10,
-  y: 10,
+  x: 0,
+  y: 0,
   width: 0.1,
   height: 0.1,
   clicked: false
@@ -456,7 +456,7 @@ function gameStatus() {
   cntx.fillText("Resources: " + numberOfResources, 170, 80);
   if (gameOver) {
     fillStyle = "black";
-    cntx.font = "90 px Poppins";
+    cntx.font = "190 px poppins";
     cntx.fillText("Game Over", 150, 330);
   }
   if (score > win_score && enemies.length === 0) {
