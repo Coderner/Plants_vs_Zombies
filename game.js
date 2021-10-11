@@ -524,6 +524,7 @@ gameboard.addEventListener("click", function () {
   const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
   const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
   if (gridPositionY < cellSize) return;
+  if (gridPositionX > 5 * cellSize) return;
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
       return;
