@@ -25,7 +25,7 @@ let enemy__interval = 400;
 //handling game stats
 gameOver = false;
 let score = 0;
-const win_score = 10;
+const win_score = 100;
 
 //getting mouse properties
 const mouse = {
@@ -452,7 +452,7 @@ function enemy() {
 }
 
 //additional resources
-const value = [20, 30, 40];
+const value = [20, 30, 40, 50, 60];
 class Resource {
   constructor() {
     this.x = Math.random() * (gameboard.width - cellSize);
@@ -463,14 +463,16 @@ class Resource {
   }
   draw() {
     ctx.fillStyle = "yellow";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = "black";
     ctx.font = "20px Orbitron";
-    ctx.fillText(this.value, this.x + 15, this.y + 25);
+    ctx.fillText(this.value, this.x - 8, this.y + 5);
   }
 }
 function handleResources() {
-  if (gridcount % 500 === 0 && score < win_score) {
+  if (gridcount % 300 === 0 && score < win_score) {
     resources.push(new Resource());
   }
   for (let i = 0; i < resources.length; i++) {
@@ -507,7 +509,7 @@ function gameStatus() {
   ctx.fillText("Resources: " + numberOfResources, 170, 80);
   if (gameOver) {
     fillStyle = "black";
-    ctx.font = "190 px poppins";
+    ctx.font = "190 px Poppins";
     ctx.fillText("Game Over", 150, 330);
   }
   if (score > win_score && enemies.length === 0) {
