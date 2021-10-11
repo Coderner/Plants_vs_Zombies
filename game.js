@@ -20,8 +20,8 @@ let score = 0;
 const win_score = 10;
 
 const mouse = {
-  x: 10,
-  y: 10,
+  x: 0,
+  y: 0,
   width: 0.1,
   height: 0.1,
 };
@@ -384,7 +384,7 @@ function gameStatus() {
   cntx.fillText("Left: " + numberOfResources, 20, 80);
   if (gameOver) {
     fillStyle = "black";
-    cntx.font = "90 px Poppins";
+    cntx.font = "190 px poppins";
     cntx.fillText("Game Over", 150, 330);
   }
   if (score > win_score && enemies.length === 0) {

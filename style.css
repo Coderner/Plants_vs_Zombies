@@ -1,6 +1,6 @@
-body {
+/* body {
   background: black;
-}
+} */
 
 #gameBoard {
   position: absolute;
@@ -9,6 +9,9 @@ body {
   transform: translate(-50%, -50%);
   width: 1000px;
   height: 600px;
-  background: white;
+  background: url("/bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+
   font-family: "Poppins", sans-serif;
 }
