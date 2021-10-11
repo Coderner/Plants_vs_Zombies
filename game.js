@@ -157,21 +157,6 @@ class defender {
   }
 }
 
-gameboard.addEventListener("click", function () {
-  const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
-  const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
-  if (gridPositionY < cellSize) return;
-  for (let i = 0; i < defenders.length; i++) {
-    if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
-      return;
-  }
-  let defenderPower = 100;
-  if (numberOfResources >= defenderPower) {
-    defenders.push(new defender(gridPositionX, gridPositionY));
-    numberOfResources -= defenderPower;
-  }
-});
-
 function handleDefenders() {
   for (let i = 0; i < defenders.length; i++) {
     defenders[i].draw();
@@ -196,6 +181,43 @@ function handleDefenders() {
         enemies[j].movement = enemies[j].speed;
       }
     }
+  }
+}
+
+//Messages
+const messages = [];
+class message {
+  constructor(value, x, y, size, color){
+    this.value = value;
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.lifeSpan = 0;
+    this.color = color;
+    this.opacity = 1;
+  }
+  change_y(){
+    this.y -= 0.3;
+    this.lifeSpan += 1;
+    if (this.opacity > 0.001)
+       this.opacity -= 0.01;
+  }
+  draw(){
+    cntx.globalAlpha = this.opacity; //sets current transparency value
+    cntx.fillStyle = this.color;
+    cntx.font = this.size + "px Orbitron";
+    cntx.fillText(this.value, this.x, this.y);
+    cntx.globalAlpha = 1;
+  }
+}
+function handlemessages(){
+  for(let i=0; i<messages.length; i++){
+    messages[i].change_y();
+    messages[i].draw();
+    if(messages[i].lifeSpan >= 50){
+       messages.splice(i,1);
+       i--;
+    }     
   }
 }
 
@@ -234,6 +256,8 @@ function enemy() {
 
     if (enemies[i].health <= 0){
       let earnedResources = enemies[i].maxHealth/10;
+      messages.push(new message("+ " + earnedResources ,130 ,20 , 20, "gold"));
+      messages.push(new message("+ " + earnedResources ,enemies[i].x ,enemies[i].y , 20, "black"));
       numberOfResources += earnedResources;
       score += earnedResources; 
       const index_position = enemyPosition.indexOf(enemies[i].y);
@@ -278,6 +302,8 @@ function handleResources(){
     if (resources[i] && mouse.x && mouse.y && ifcollide(resources[i], mouse))
     {
       numberOfResources += resources[i].value;
+      messages.push(new message("+ " + resources[i].value, resources[i].x, resources[i].y, 20, "black"));
+      messages.push(new message("+ " + resources[i].value,  120, 55, 20, "gold"));
       resources.splice(i,1);
       i--;
     }
@@ -304,6 +330,25 @@ function gameStatus() {
   }
 }
 
+//event listener for creating defenders
+gameboard.addEventListener("click", function () {
+  const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
+  const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
+  if (gridPositionY < cellSize) return;
+  for (let i = 0; i < defenders.length; i++) {
+    if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
+      return;
+  }
+  let defenderPower = 100;
+  if (numberOfResources >= defenderPower) {
+    defenders.push(new defender(gridPositionX, gridPositionY));
+    numberOfResources -= defenderPower;
+  }
+  else{
+    messages.push(new message("Need more Resources", mouse.x, mouse.y, 20, "blue"));
+  }
+});
+
 function update() {
   //to update displayBar and grid after every change
   cntx.clearRect(0, 0, gameboard.width, gameboard.height);
@@ -315,6 +360,7 @@ function update() {
   handleBeams();
   enemy();
   gameStatus();
+  handlemessages();
   gridcount++;
   if (!gameOver) requestAnimationFrame(update);
 }
