@@ -7,11 +7,20 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+<<<<<<< HEAD
   width: 1000px;
   height: 600px;
   background: url("/bg.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 
+=======
+  width: 1920px;
+  height: 969px;
+
+  background: url("./bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+>>>>>>> c7dec3ec989476de731109e21adc6729232c0fe4
   font-family: "Poppins", sans-serif;
 }
