@@ -18,13 +18,21 @@ gameOver = false;
 const beams = []; //to hold all the projectile beams for all defender objects
 let score = 0;
 const win_score = 10;
+let chosenDefender = 1;
 
 const mouse = {
   x: 10,
   y: 10,
   width: 0.1,
   height: 0.1,
+  clicked: false
 };
+gameboard.addEventListener("mousedown", function () {
+   mouse.clicked = true;
+});
+gameboard.addEventListener("mouseup", function () {
+  mouse.clicked = false;
+});
 
 let gameboardposition = gameboard.getBoundingClientRect();
 gameboard.addEventListener("mousemove", function (e) {
@@ -141,6 +149,7 @@ class defender {
     this.animationheight = 128;
     this.minframe = 0;
     this.maxframe = 16;
+    this.chosenDefender = chosenDefender;
   }
   draw() {
     // cntx.fillStyle = "blue";
@@ -148,17 +157,32 @@ class defender {
     cntx.fillStyle = "gold";
     cntx.font = "30px Poppins";
     cntx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
-    cntx.drawImage(
-      defender1,
-      this.animationX * this.animationwidth,
-      0,
-      this.animationwidth,
-      this.animationheight,
-      this.x,
-      this.y,
-      this.width,
-      this.height
-    );
+    if(this.chosenDefender === 1){
+      cntx.drawImage(
+        defender1,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    } else if(this.chosenDefender ===2 ){
+      cntx.drawImage(
+        defender1,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
+    
   }
   update_beam() {
     if (gridcount % 10 === 0) {
@@ -201,6 +225,53 @@ function handleDefenders() {
     }
   }
 }
+
+//switching units for defenders
+const layout1 = {
+  x: 10,
+  y: 10,
+  width: 70,
+  height: 85
+}
+const layout2 = {
+  x: 90,
+  y: 10,
+  width: 70,
+  height: 85
+}
+function selectDefender(){
+  let layout1stroke = "black";
+  let layout2stroke = "black";
+  if(ifcollide(mouse, layout1) && mouse.clicked){
+    chosenDefender = 1;
+  }
+  else if(ifcollide(mouse, layout2) && mouse.clicked){
+    chosenDefender = 2;
+  }
+  
+  if(chosenDefender === 1){
+     layout1stroke = "gold";
+     layout2stroke = "black";
+  }else if(chosenDefender === 2){
+     layout2stroke = "gold";
+     layout1stroke = "black";
+  }else{
+    layout1stroke = "black";
+    layout2stroke = "black";
+  }
+  
+  cntx.linewidth = 1;
+  cntx.fillStyle = "rgba(0,0,0,0.2)"
+  cntx.fillRect(layout1.x, layout1.y, layout1.width, layout1.height);
+  cntx.strokeStyle = layout1stroke;
+  cntx.strokeRect(layout1.x, layout1.y, layout1.width, layout1.height);
+  cntx.drawImage(defender1, 0, 0, 180, 194, 0, 5, 194/2, 194/2);
+  cntx.fillRect(layout2.x, layout2.y, layout2.width, layout2.height);
+  cntx.strokeStyle = layout2stroke;
+  cntx.strokeRect(layout2.x, layout2.y, layout2.width, layout2.height);
+  cntx.drawImage(defender1, 0, 0, 194, 194, 0, 5, 194/2, 194/2);
+}
+
 
 //Messages
 const messages = [];
@@ -306,7 +377,7 @@ function enemy() {
 
     if (enemies[i].health <= 0) {
       let earnedResources = enemies[i].maxHealth / 10;
-      messages.push(new message("+ " + earnedResources, 200, 20, 20, "gold"));
+      messages.push(new message("+ " + earnedResources, 250, 20, 20, "gold"));
       messages.push(
         new message(
           "+ " + earnedResources,
@@ -370,7 +441,7 @@ function handleResources() {
         )
       );
       messages.push(
-        new message("+ " + resources[i].value, 160, 55, 20, "gold")
+        new message("+ " + resources[i].value, 300, 55, 20, "gold")
       );
       resources.splice(i, 1);
       i--;
@@ -381,8 +452,8 @@ function handleResources() {
 function gameStatus() {
   cntx.fillStyle = "black";
   cntx.font = "30px Poppins";
-  cntx.fillText("Score: " + score, 120, 40);
-  cntx.fillText("Left: " + numberOfResources, 120, 80);
+  cntx.fillText("Score: " + score, 170, 40);
+  cntx.fillText("Resources: " + numberOfResources, 170, 80);
   if (gameOver) {
     fillStyle = "black";
     cntx.font = "90 px Poppins";
@@ -427,6 +498,7 @@ function main__animation() {
   handleResources();
   handleBeams();
   enemy();
+  selectDefender();
   gameStatus();
   handlemessages();
   gridcount++;
