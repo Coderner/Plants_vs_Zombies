@@ -306,7 +306,7 @@ function enemy() {
 
     if (enemies[i].health <= 0) {
       let earnedResources = enemies[i].maxHealth / 10;
-      messages.push(new message("+ " + earnedResources, 130, 20, 20, "gold"));
+      messages.push(new message("+ " + earnedResources, 200, 20, 20, "gold"));
       messages.push(
         new message(
           "+ " + earnedResources,
@@ -370,34 +370,13 @@ function handleResources() {
         )
       );
       messages.push(
-        new message("+ " + resources[i].value, 120, 55, 20, "gold")
+        new message("+ " + resources[i].value, 160, 55, 20, "gold")
       );
       resources.splice(i, 1);
       i--;
     }
   }
 }
-
-//for switching units
-const defender1 = {
-  x : 10,
-  y : 10,
-  width : 70,
-  height : 85
-}
-
-const defender2 = {
-  x : 10,
-  y : 10,
-  width : 70,
-  height : 85
-}
-
-function selectDefender(){
-   cntx.lineWidth = 1;
-   cntx.fillRect( defender1.x, defender1.y, defender1.width, defender1.height);
-   cntx.fillRect( defender2.x, defender2.y, defender2.width, defender2.height);
-};
 
 function gameStatus() {
   cntx.fillStyle = "black";
@@ -448,7 +427,6 @@ function main__animation() {
   handleResources();
   handleBeams();
   enemy();
-  // selectDefender();
   gameStatus();
   handlemessages();
   gridcount++;
