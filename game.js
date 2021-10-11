@@ -1,31 +1,49 @@
-const gameboard = document.getElementById("gameBoard");
-const cntx = gameboard.getContext("2d");
-gameboard.width = 1000;
-gameboard.height = 600;
+const gameboard = document.getElementById("gameBoard"); // to fetch canvas from DOM
+const ctx = gameboard.getContext("2d"); // to get the context of the canvas (2d model)
 
+//size of gameboard
+gameboard.width = 1920;
+gameboard.height = 969;
+
+//grid variables (for each item to be placed on field)
 const cellSize = 100;
 const cellGapping = 4;
 let gridcount = 0;
 const Grid = [];
 
+//defenders on the left side to stop the enemies
 const defenders = [];
-const enemies = [];
 const resources = [];
+const beams = []; //to hold all the projectile beams for all defender objects
+let chosenDefender = 1;
 
+//attackers coming from the right side to defeat defenders
+const enemies = [];
 let enemyPosition = [];
 let enemy__interval = 400;
+
+//handling game stats
 gameOver = false;
-const beams = []; //to hold all the projectile beams for all defender objects
 let score = 0;
 const win_score = 10;
 
+//getting mouse properties
 const mouse = {
-  x: 10,
-  y: 10,
+  x: 0,
+  y: 0,
   width: 0.1,
   height: 0.1,
+  clicked: false,
 };
+//function to drop defenders
+gameboard.addEventListener("mousedown", function () {
+  mouse.clicked = true;
+});
+gameboard.addEventListener("mouseup", function () {
+  mouse.clicked = false;
+});
 
+//function to place grid over mouse over
 let gameboardposition = gameboard.getBoundingClientRect();
 gameboard.addEventListener("mousemove", function (e) {
   mouse.x = e.x - gameboardposition.left;
@@ -42,6 +60,7 @@ const displayBar = {
   height: cellSize,
 };
 
+//class to call each cell
 class Cell {
   constructor(x, y) {
     this.x = x;
@@ -50,9 +69,9 @@ class Cell {
     this.height = cellSize;
   }
   draw() {
-    if (mouse.x && mouse.y && ifcollide(this, mouse)) {
-      cntx.strokeStyle = "black";
-      cntx.strokeRect(this.x, this.y, this.width, this.height);
+    if (mouse.x && mouse.y && test__collison(this, mouse)) {
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(this.x, this.y, this.width, this.height);
     }
   }
 }
@@ -65,10 +84,10 @@ function gridpush() {
 }
 gridpush();
 
-function create() {
+function grid__generate() {
   for (i = 0; i < Grid.length; i++) Grid[i].draw();
 }
-function ifcollide(first, second) {
+function test__collison(first, second) {
   if (
     !(
       first.x > second.x + second.width ||
@@ -82,32 +101,68 @@ function ifcollide(first, second) {
 }
 
 //beams
+const beam1 = new Image();
+beam1.src = "beam1.png";
+const beam2 = new Image();
+beam2.src = "beam2.png";
 class Beams {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.width = 10;
-    this.height = 10;
+    this.width = 34;
+    this.height = 34;
     this.power = 20;
     this.speed = 5;
+    this.animationX = 0;
+    this.animationY = 0;
+    this.animationwidth = 34;
+    this.animationheight = 34;
+    this.minframe = 0;
+    this.maxframe = 10;
   }
   move() {
     this.x += this.speed;
   }
-  create() {
-    cntx.fillStyle = "black";
-    cntx.beginPath();
-    cntx.arc(this.x, this.y, this.width, 0, Math.PI * 2);
-    cntx.fill();
+  draw() {
+    // ctx.fillStyle = "black";
+    // ctx.beginPath();
+    // ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2);
+    // ctx.fill();
+
+    if (chosenDefender === 1) {
+      ctx.drawImage(
+        beam1,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    } else if (chosenDefender === 2) {
+      ctx.drawImage(
+        beam2,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
   }
 }
 function handleBeams() {
   for (let i = 0; i < beams.length; i++) {
     beams[i].move();
-    beams[i].create();
+    beams[i].draw();
 
     for (let j = 0; j < enemies.length; j++) {
-      if (enemies[j] && beams[i] && ifcollide(beams[i], enemies[j])) {
+      if (enemies[j] && beams[i] && test__collison(beams[i], enemies[j])) {
         enemies[j].health -= beams[i].power;
         beams.splice(i, 1);
         i--;
@@ -124,7 +179,9 @@ function handleBeams() {
 //defenders
 let numberOfResources = 300;
 const defender1 = new Image();
-defender1.src = "alien__anime.png";
+defender1.src = "attack1.png";
+const defender2 = new Image();
+defender2.src = "attack2.png";
 
 class defender {
   constructor(x, y) {
@@ -140,28 +197,43 @@ class defender {
     this.animationwidth = 128;
     this.animationheight = 128;
     this.minframe = 0;
-    this.maxframe = 16;
+    this.maxframe = 10;
+    this.chosenDefender = chosenDefender;
   }
   draw() {
-    // cntx.fillStyle = "blue";
-    // cntx.fillRect(this.x, this.y, this.width, this.height);
-    cntx.fillStyle = "gold";
-    cntx.font = "30px Poppins";
-    cntx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
-    cntx.drawImage(
-      defender1,
-      this.animationX * this.animationwidth,
-      0,
-      this.animationwidth,
-      this.animationheight,
-      this.x,
-      this.y,
-      this.width,
-      this.height
-    );
+    // ctx.fillStyle = "blue";
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = "gold";
+    // ctx.font = "30px Poppins";
+    // ctx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
+    if (this.chosenDefender === 1) {
+      ctx.drawImage(
+        defender1,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    } else if (this.chosenDefender === 2) {
+      ctx.drawImage(
+        defender2,
+        this.animationX * this.animationwidth,
+        0,
+        this.animationwidth,
+        this.animationheight,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
   }
   update_beam() {
-    if (gridcount % 10 === 0) {
+    if (gridcount % 6 === 0) {
       if (this.animationX < this.maxframe) this.animationX++;
       else this.animationX = this.minframe;
     }
@@ -189,7 +261,7 @@ function handleDefenders() {
     }
 
     for (let j = 0; j < enemies.length; j++) {
-      if (ifcollide(defenders[i] && defenders[i], enemies[j])) {
+      if (test__collison(defenders[i] && defenders[i], enemies[j])) {
         enemies[i].movement = 0;
         defenders[i].health -= 0.2;
       }
@@ -200,6 +272,51 @@ function handleDefenders() {
       }
     }
   }
+}
+
+//switching units for defenders
+const layout1 = {
+  x: 10,
+  y: 10,
+  width: 80,
+  height: 85,
+};
+const layout2 = {
+  x: 90,
+  y: 10,
+  width: 80,
+  height: 85,
+};
+function selectDefender() {
+  let layout1stroke = "black";
+  let layout2stroke = "black";
+  if (test__collison(mouse, layout1) && mouse.clicked) {
+    chosenDefender = 1;
+  } else if (test__collison(mouse, layout2) && mouse.clicked) {
+    chosenDefender = 2;
+  }
+
+  if (chosenDefender === 1) {
+    layout1stroke = "gold";
+    layout2stroke = "black";
+  } else if (chosenDefender === 2) {
+    layout2stroke = "gold";
+    layout1stroke = "black";
+  } else {
+    layout1stroke = "black";
+    layout2stroke = "black";
+  }
+
+  ctx.linewidth = 1;
+  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillRect(layout1.x, layout1.y, layout1.width, layout1.height);
+  ctx.strokeStyle = layout1stroke;
+  ctx.strokeRect(layout1.x, layout1.y, layout1.width, layout1.height);
+  ctx.drawImage(defender1, 0, 0, 128, 128, 20, 5, 128 / 2, 128 / 2);
+  ctx.fillRect(layout2.x, layout2.y, layout2.width, layout2.height);
+  ctx.strokeStyle = layout2stroke;
+  ctx.strokeRect(layout2.x, layout2.y, layout2.width, layout2.height);
+  ctx.drawImage(defender2, 0, 0, 128, 128, 90, 5, 128 / 2, 128 / 2);
 }
 
 //Messages
@@ -220,11 +337,11 @@ class message {
     if (this.opacity > 0.001) this.opacity -= 0.01;
   }
   draw() {
-    cntx.globalAlpha = this.opacity; //sets current transparency value
-    cntx.fillStyle = this.color;
-    cntx.font = this.size + "px Orbitron";
-    cntx.fillText(this.value, this.x, this.y);
-    cntx.globalAlpha = 1;
+    ctx.globalAlpha = this.opacity; //sets current transparency value
+    ctx.fillStyle = this.color;
+    ctx.font = this.size + "px Orbitron";
+    ctx.fillText(this.value, this.x, this.y);
+    ctx.globalAlpha = 1;
   }
 }
 function handlemessages() {
@@ -277,12 +394,12 @@ class Enemy {
     }
   }
   draw() {
-    // cntx.fillStyle = "red";
-    // cntx.fillRect(this.x, this.y, this.width, this.height);
-    cntx.fillStyle = "black";
-    cntx.font = "30px Poppins";
-    cntx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
-    cntx.drawImage(
+    // ctx.fillStyle = "red";
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = "black";
+    // ctx.font = "30px Poppins";
+    //  ctx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
+    ctx.drawImage(
       this.EnemyType,
       this.animationX * this.animationwidth,
       0,
@@ -306,7 +423,7 @@ function enemy() {
 
     if (enemies[i].health <= 0) {
       let earnedResources = enemies[i].maxHealth / 10;
-      messages.push(new message("+ " + earnedResources, 130, 20, 20, "gold"));
+      messages.push(new message("+ " + earnedResources, 250, 20, 20, "gold"));
       messages.push(
         new message(
           "+ " + earnedResources,
@@ -333,6 +450,7 @@ function enemy() {
     if (enemy__interval > 180) enemy__interval -= 100;
   }
 }
+
 //additional resources
 const value = [20, 30, 40];
 class Resource {
@@ -344,11 +462,11 @@ class Resource {
     this.value = value[Math.floor(Math.random() * value.length)];
   }
   draw() {
-    cntx.fillStyle = "yellow";
-    cntx.fillRect(this.x, this.y, this.width, this.height);
-    cntx.fillStyle = "black";
-    cntx.font = "20px Orbitron";
-    cntx.fillText(this.value, this.x + 15, this.y + 25);
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "black";
+    ctx.font = "20px Orbitron";
+    ctx.fillText(this.value, this.x + 15, this.y + 25);
   }
 }
 function handleResources() {
@@ -357,7 +475,12 @@ function handleResources() {
   }
   for (let i = 0; i < resources.length; i++) {
     resources[i].draw();
-    if (resources[i] && mouse.x && mouse.y && ifcollide(resources[i], mouse)) {
+    if (
+      resources[i] &&
+      mouse.x &&
+      mouse.y &&
+      test__collison(resources[i], mouse)
+    ) {
       numberOfResources += resources[i].value;
       messages.push(
         new message(
@@ -369,7 +492,7 @@ function handleResources() {
         )
       );
       messages.push(
-        new message("+ " + resources[i].value, 120, 55, 20, "gold")
+        new message("+ " + resources[i].value, 300, 55, 20, "gold")
       );
       resources.splice(i, 1);
       i--;
@@ -378,21 +501,21 @@ function handleResources() {
 }
 
 function gameStatus() {
-  cntx.fillStyle = "black";
-  cntx.font = "30px Poppins";
-  cntx.fillText("Score: " + score, 20, 40);
-  cntx.fillText("Left: " + numberOfResources, 20, 80);
+  ctx.fillStyle = "black";
+  ctx.font = "30px Poppins";
+  ctx.fillText("Score: " + score, 170, 40);
+  ctx.fillText("Resources: " + numberOfResources, 170, 80);
   if (gameOver) {
     fillStyle = "black";
-    cntx.font = "90 px Poppins";
-    cntx.fillText("Game Over", 150, 330);
+    ctx.font = "190 px poppins";
+    ctx.fillText("Game Over", 150, 330);
   }
   if (score > win_score && enemies.length === 0) {
-    cntx.fillStyle = "black";
-    cntx.font = "60px Orbitron";
-    cntx.fillText("LEVEL COMPLETE", 130, 300);
-    cntx.font = "30px Orbitron";
-    cntx.fillText("You win with " + score + " points", 134, 340);
+    ctx.fillStyle = "black";
+    ctx.font = "60px Orbitron";
+    ctx.fillText("LEVEL COMPLETE", 130, 300);
+    ctx.font = "30px Orbitron";
+    ctx.fillText("You win with " + score + " points", 134, 340);
   }
 }
 
@@ -401,6 +524,7 @@ gameboard.addEventListener("click", function () {
   const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
   const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
   if (gridPositionY < cellSize) return;
+  if (gridPositionX > 5 * cellSize) return;
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
       return;
@@ -417,15 +541,16 @@ gameboard.addEventListener("click", function () {
 });
 
 function main__animation() {
-  //to update displayBar and grid after every change
-  cntx.clearRect(0, 0, gameboard.width, gameboard.height);
-  cntx.fillStyle = "skyblue";
-  cntx.fillRect(0, 0, displayBar.width, displayBar.height);
-  create();
+  //to update ControlBar and grid after every change
+  ctx.clearRect(0, 0, gameboard.width, gameboard.height);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.fillRect(0, 0, displayBar.width, displayBar.height);
+  grid__generate();
   handleDefenders();
   handleResources();
   handleBeams();
   enemy();
+  selectDefender();
   gameStatus();
   handlemessages();
   gridcount++;
