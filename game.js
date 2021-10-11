@@ -19,12 +19,12 @@ const beams = []; //to hold all the projectile beams for all defender objects
 let score = 0;
 const win_score = 10;
 
-// const mouse = {
-//   x: 10,
-//   y: 10,
-//   width: 0.1,
-//   height: 0.1,
-// };
+const mouse = {
+  x: 10,
+  y: 10,
+  width: 0.1,
+  height: 0.1,
+};
 
 let gameboardposition = gameboard.getBoundingClientRect();
 gameboard.addEventListener("mousemove", function (e) {
@@ -123,6 +123,8 @@ function handleBeams() {
 
 //defenders
 let numberOfResources = 300;
+const defender1 = new Image();
+defender1.src = "alien__anime.png";
 
 class defender {
   constructor(x, y) {
@@ -133,15 +135,36 @@ class defender {
     this.shooting = false;
     this.health = 100;
     this.timer = 0;
+    this.animationX = 0;
+    this.animationY = 0;
+    this.animationwidth = 128;
+    this.animationheight = 128;
+    this.minframe = 0;
+    this.maxframe = 16;
   }
   draw() {
-    cntx.fillStyle = "blue";
-    cntx.fillRect(this.x, this.y, this.width, this.height);
+    // cntx.fillStyle = "blue";
+    // cntx.fillRect(this.x, this.y, this.width, this.height);
     cntx.fillStyle = "gold";
     cntx.font = "30px Poppins";
     cntx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
+    cntx.drawImage(
+      defender1,
+      this.animationX * this.animationwidth,
+      0,
+      this.animationwidth,
+      this.animationheight,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
   }
   update_beam() {
+    if (gridcount % 10 === 0) {
+      if (this.animationX < this.maxframe) this.animationX++;
+      else this.animationX = this.minframe;
+    }
     if (this.shooting) {
       this.timer++;
       if (this.timer % 100 === 0) {
@@ -216,26 +239,60 @@ function handlemessages() {
 }
 
 //Enemies
+
+const EnemyTypes = [];
+const enemy1 = new Image();
+enemy1.src = "incoming1.png";
+EnemyTypes.push(enemy1);
+const enemy2 = new Image();
+enemy2.src = "incoming2.png";
+EnemyTypes.push(enemy2);
+const enemy3 = new Image();
+enemy3.src = "incoming3.png";
+EnemyTypes.push(enemy3);
+
 class Enemy {
   constructor(verticalPosition) {
     this.x = gameboard.width;
     this.y = verticalPosition;
     this.width = cellSize - cellGapping * 2;
     this.height = cellSize - cellGapping * 2;
-    this.speed = Math.random() * 0.4 + 0.3;
+    this.speed = Math.random() * 0.01 + 0.3;
     this.movement = this.speed;
     this.health = 100;
     this.maxHealth = this.health;
+    this.EnemyType = EnemyTypes[Math.floor(Math.random() * EnemyTypes.length)];
+    this.animationX = 0;
+    this.animationY = 0;
+    this.minframe = 0;
+    this.maxframe = 4;
+    this.animationwidth = 128;
+    this.animationheight = 128;
   }
   change() {
     this.x -= this.movement;
+    if (gridcount % 10 === 0) {
+      if (this.animationX < this.maxframe) this.animationX++;
+      else this.animationX = this.minframe;
+    }
   }
   draw() {
-    cntx.fillStyle = "red";
-    cntx.fillRect(this.x, this.y, this.width, this.height);
+    // cntx.fillStyle = "red";
+    // cntx.fillRect(this.x, this.y, this.width, this.height);
     cntx.fillStyle = "black";
     cntx.font = "30px Poppins";
     cntx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
+    cntx.drawImage(
+      this.EnemyType,
+      this.animationX * this.animationwidth,
+      0,
+      this.animationwidth,
+      this.animationheight,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
   }
 }
 function enemy() {
@@ -276,7 +333,6 @@ function enemy() {
     if (enemy__interval > 180) enemy__interval -= 100;
   }
 }
-
 //additional resources
 const value = [20, 30, 40];
 class Resource {
@@ -360,7 +416,7 @@ gameboard.addEventListener("click", function () {
   }
 });
 
-function update() {
+function main__animation() {
   //to update displayBar and grid after every change
   cntx.clearRect(0, 0, gameboard.width, gameboard.height);
   cntx.fillStyle = "skyblue";
@@ -373,6 +429,6 @@ function update() {
   gameStatus();
   handlemessages();
   gridcount++;
-  if (!gameOver) requestAnimationFrame(update);
+  if (!gameOver) requestAnimationFrame(main__animation);
 }
-update();
+main__animation();
