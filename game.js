@@ -333,6 +333,7 @@ function enemy() {
     if (enemy__interval > 180) enemy__interval -= 100;
   }
 }
+
 //additional resources
 const value = [20, 30, 40];
 class Resource {
@@ -377,11 +378,32 @@ function handleResources() {
   }
 }
 
+//for switching units
+const defender1 = {
+  x : 10,
+  y : 10,
+  width : 70,
+  height : 85
+}
+
+const defender2 = {
+  x : 10,
+  y : 10,
+  width : 70,
+  height : 85
+}
+
+function selectDefender(){
+   cntx.lineWidth = 1;
+   cntx.fillRect( defender1.x, defender1.y, defender1.width, defender1.height);
+   cntx.fillRect( defender2.x, defender2.y, defender2.width, defender2.height);
+};
+
 function gameStatus() {
   cntx.fillStyle = "black";
   cntx.font = "30px Poppins";
-  cntx.fillText("Score: " + score, 20, 40);
-  cntx.fillText("Left: " + numberOfResources, 20, 80);
+  cntx.fillText("Score: " + score, 120, 40);
+  cntx.fillText("Left: " + numberOfResources, 120, 80);
   if (gameOver) {
     fillStyle = "black";
     cntx.font = "90 px Poppins";
@@ -426,6 +448,7 @@ function main__animation() {
   handleResources();
   handleBeams();
   enemy();
+  // selectDefender();
   gameStatus();
   handlemessages();
   gridcount++;
