@@ -68,14 +68,15 @@ class Cell {
     this.width = cellSize;
     this.height = cellSize;
   }
+  // drawing girds
   draw() {
-    if (mouse.x && mouse.y && test__collison(this, mouse)) {
+    if (mouse.x && mouse.y && test__collision(this, mouse)) {
       ctx.strokeStyle = "black";
       ctx.strokeRect(this.x, this.y, this.width, this.height);
     }
   }
 }
-
+//pushing grids to the canvas
 function gridpush() {
   for (let y = cellSize; y < gameboard.height; y += cellSize)
     for (let x = 0; x < gameboard.width; x += cellSize) {
@@ -87,7 +88,9 @@ gridpush();
 function grid__generate() {
   for (i = 0; i < Grid.length; i++) Grid[i].draw();
 }
-function test__collison(first, second) {
+// to check collision between any two objects
+
+function test__collision(first, second) {
   if (
     !(
       first.x > second.x + second.width ||
@@ -129,6 +132,7 @@ class Beams {
     // ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2);
     // ctx.fill();
 
+    //conditions to match ammo as per the chosen defender
     if (chosenDefender === 1) {
       ctx.drawImage(
         beam1,
@@ -158,11 +162,15 @@ class Beams {
 }
 function handleBeams() {
   for (let i = 0; i < beams.length; i++) {
+    //checking number of shots
+    console.log(beams.length);
     beams[i].move();
     beams[i].draw();
 
     for (let j = 0; j < enemies.length; j++) {
-      if (enemies[j] && beams[i] && test__collison(beams[i], enemies[j])) {
+      // checking number of enenmies passed
+      //console.log(enemies.length);
+      if (enemies[j] && beams[i] && test__collision(beams[i], enemies[j])) {
         enemies[j].health -= beams[i].power;
         beams.splice(i, 1);
         i--;
@@ -171,13 +179,15 @@ function handleBeams() {
 
     if (beams[i] && beams[i].x > gameboard.width - cellSize) {
       beams.splice(i, 1);
-      i--; //no beam gets skipped
+      i--; //no beam gets skipped (updating index)
     }
   }
 }
 
 //defenders
 let numberOfResources = 300;
+
+//making types of defenders
 const defender1 = new Image();
 defender1.src = "./assets/attack1.png";
 const defender2 = new Image();
@@ -238,6 +248,8 @@ class defender {
       else this.animationX = this.minframe;
     }
     if (this.shooting) {
+      //checking timer for beams
+      console.log(this.timer);
       this.timer++;
       if (this.timer % 100 === 0) {
         beams.push(new Beams(this.x + 50, this.y + 50));
@@ -261,7 +273,7 @@ function handleDefenders() {
     }
 
     for (let j = 0; j < enemies.length; j++) {
-      if (test__collison(defenders[i] && defenders[i], enemies[j])) {
+      if (test__collision(defenders[i] && defenders[i], enemies[j])) {
         enemies[i].movement = 0;
         defenders[i].health -= 0.2;
       }
@@ -290,9 +302,9 @@ const layout2 = {
 function selectDefender() {
   let layout1stroke = "black";
   let layout2stroke = "black";
-  if (test__collison(mouse, layout1) && mouse.clicked) {
+  if (test__collision(mouse, layout1) && mouse.clicked) {
     chosenDefender = 1;
-  } else if (test__collison(mouse, layout2) && mouse.clicked) {
+  } else if (test__collision(mouse, layout2) && mouse.clicked) {
     chosenDefender = 2;
   }
 
@@ -481,7 +493,7 @@ function handleResources() {
       resources[i] &&
       mouse.x &&
       mouse.y &&
-      test__collison(resources[i], mouse)
+      test__collision(resources[i], mouse)
     ) {
       numberOfResources += resources[i].value;
       messages.push(
