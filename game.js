@@ -25,7 +25,7 @@ let enemy__interval = 400;
 //handling game stats
 gameOver = false;
 let score = 0;
-const win_score = 100;
+const win_score = 90;
 
 //getting mouse properties
 const mouse = {
@@ -214,7 +214,7 @@ class defender {
     // ctx.fillStyle = "blue";
     // ctx.fillRect(this.x, this.y, this.width, this.height);
     // ctx.fillStyle = "gold";
-    // ctx.font = "30px Poppins";
+    // ctx.font = "30px arial";
     // ctx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
     if (this.chosenDefender === 1) {
       ctx.drawImage(
@@ -249,39 +249,13 @@ class defender {
     }
     if (this.shooting) {
       //checking timer for beams
-      console.log(this.timer);
+      //  console.log(this.timer);
       this.timer++;
       if (this.timer % 100 === 0) {
         beams.push(new Beams(this.x + 50, this.y + 50));
       }
     } else {
       this.timer = 0;
-    }
-  }
-}
-
-function handleDefenders() {
-  for (let i = 0; i < defenders.length; i++) {
-    defenders[i].draw();
-    defenders[i].update_beam();
-
-    if (enemyPosition.indexOf(defenders[i].y) !== -1) {
-      // beam wont be fired untill enemy occurs
-      defenders[i].shooting = true;
-    } else {
-      defenders[i].shooting = false;
-    }
-
-    for (let j = 0; j < enemies.length; j++) {
-      if (test__collision(defenders[i] && defenders[i], enemies[j])) {
-        enemies[i].movement = 0;
-        defenders[i].health -= 0.2;
-      }
-      if (defenders[i].health <= 0) {
-        defenders.splice(i, 1);
-        i--;
-        enemies[j].movement = enemies[j].speed;
-      }
     }
   }
 }
@@ -351,7 +325,7 @@ class message {
   draw() {
     ctx.globalAlpha = this.opacity; //sets current transparency value
     ctx.fillStyle = this.color;
-    ctx.font = this.size + "px Orbitron";
+    ctx.font = this.size + "px arial";
     ctx.fillText(this.value, this.x, this.y);
     ctx.globalAlpha = 1;
   }
@@ -409,7 +383,7 @@ class Enemy {
     // ctx.fillStyle = "red";
     // ctx.fillRect(this.x, this.y, this.width, this.height);
     // ctx.fillStyle = "black";
-    // ctx.font = "30px Poppins";
+    // ctx.font = "30px arial";
     //  ctx.fillText(Math.floor(this.health), this.x + 15, this.y + 30);
     ctx.drawImage(
       this.EnemyType,
@@ -429,7 +403,7 @@ function enemy() {
     enemies[i].change();
     enemies[i].draw();
 
-    if (enemies[i].x < 0) {
+    if (enemies[i].x <= 0) {
       gameOver = true;
     }
 
@@ -454,7 +428,7 @@ function enemy() {
     }
   }
 
-  if (gridcount % enemy__interval === 0 && score < win_score) {
+  if (gridcount % enemy__interval === 0 && score < win_score - 40) {
     let verticalPosition =
       Math.floor(Math.random() * 6 + 1) * cellSize + cellGapping;
     enemies.push(new Enemy(verticalPosition));
@@ -479,7 +453,7 @@ class Resource {
     ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "black";
-    ctx.font = "20px Orbitron";
+    ctx.font = "20px arial";
     ctx.fillText(this.value, this.x - 8, this.y + 5);
   }
 }
@@ -514,21 +488,48 @@ function handleResources() {
   }
 }
 
+function handleDefenders() {
+  for (let i = 0; i < defenders.length; i++) {
+    defenders[i].draw();
+    defenders[i].update_beam();
+
+    if (enemyPosition.indexOf(defenders[i].y) !== -1) {
+      // beam wont be fired untill enemy occurs
+      defenders[i].shooting = true;
+    } else {
+      defenders[i].shooting = false;
+    }
+    for (let j = 0; j < enemies.length; j++) {
+      if (test__collision(defenders[i], enemies[j])) {
+        enemies[i].movement = 0;
+        defenders[i].health -= 0.2;
+      }
+      if (defenders[i] && defenders[i].health <= 0) {
+        defenders.splice(i, 1);
+        i--;
+        enemies[j].movement = enemies[j].speed;
+      }
+    }
+  }
+}
 function gameStatus() {
   ctx.fillStyle = "black";
-  ctx.font = "30px Poppins";
+  ctx.font = "30px arial";
   ctx.fillText("Score: " + score, 170, 40);
   ctx.fillText("Resources: " + numberOfResources, 170, 80);
   if (gameOver) {
     fillStyle = "black";
-    ctx.font = "190 px Poppins";
+    ctx.font = "90px arial";
     ctx.fillText("Game Over", 150, 330);
   }
+
+  if (score > win_score) enemies.length = 0;
+
   if (score > win_score && enemies.length === 0) {
     ctx.fillStyle = "black";
-    ctx.font = "60px Orbitron";
+    ctx.font = "60px arial";
     ctx.fillText("LEVEL COMPLETE", 130, 300);
-    ctx.font = "30px Orbitron";
+    ctx.font = "30px arial";
     ctx.fillText("You win with " + score + " points", 134, 340);
   }
 }
@@ -537,7 +538,9 @@ function gameStatus() {
 gameboard.addEventListener("click", function () {
   const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGapping;
   const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGapping;
+  // to avoid placing the defenders at the same position
   if (gridPositionY < cellSize) return;
+  // to restrict placing defenders after 5 vertical lines
   if (gridPositionX > 5 * cellSize) return;
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY)
